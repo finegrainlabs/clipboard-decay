@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.clipboard-decay"
+          path="/org/gnome/shell/extensions/clipboard-decay/">
+    <key name="enable-general-timeout" type="b">
+      <default>false</default>
+      <summary>Enable the general clipboard timer</summary>
+      <description>Apply the general timeout to clipboard content not detected as coming from a configured sensitive source.</description>
+    </key>
+    <key name="enable-sensitive-sources" type="b">
+      <default>true</default>
+      <summary>Enable best-effort sensitive-source detection</summary>
+      <description>Use the focused application's WM_CLASS or app ID as a best-effort hint when deciding whether to apply the shorter timeout to configured sensitive sources.</description>
+    </key>
+    <key name="detect-window-mode" type="b">
+      <default>false</default>
+      <summary>Capture the next focused window identifier</summary>
+      <description>When enabled, Clipboard Decay captures the next focused window WM_CLASS or app ID and stores it for the preferences dialog.</description>
+    </key>
+    <key name="detected-window-id" type="s">
+      <default>''</default>
+      <summary>Captured focused window identifier</summary>
+      <description>The most recently captured focused window WM_CLASS or app ID, used to help populate the manual sensitive-app fallback.</description>
+    </key>
+    <key name="sensitive-timeout" type="i">
+      <range min="1" max="3600"/>
+      <default>20</default>
+      <summary>Sensitive clipboard timeout (seconds)</summary>
+      <description>Seconds before clearing clipboard content detected as coming from a configured sensitive source.</description>
+    </key>
+    <key name="general-timeout" type="i">
+      <range min="1" max="3600"/>
+      <default>300</default>
+      <summary>General clipboard timeout (seconds)</summary>
+      <description>Seconds before clearing clipboard content from all other sources.</description>
+    </key>
+    <key name="sensitive-sources" type="as">
+      <default>[]</default>
+      <summary>Sensitive source identifiers</summary>
+      <description>WM_CLASS names or app IDs (without any trailing .desktop suffix) treated as sensitive sources. Matching is case-insensitive.</description>
+    </key>
+  </schema>
+</schemalist>

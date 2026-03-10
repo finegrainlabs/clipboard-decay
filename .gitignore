@@ -1,0 +1,4 @@
+schemas/gschemas.compiled
+.coverage/
+.build/
+clipboard-decay@*.zip
