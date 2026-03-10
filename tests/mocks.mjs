@@ -300,6 +300,18 @@ export class MockToolbarView extends MockContainer {
 }
 
 export class MockHeaderBar extends MockSignalObject {}
+export class MockAboutDialog extends MockSignalObject {
+    constructor(props = {}) {
+        super(props);
+        this.present_calls = [];
+    }
+
+    present(window) {
+        this.present_calls.push(window);
+        globalThis.__mocks.presentedAboutDialogs.push(this);
+    }
+}
+
 export class MockNavigationPage extends MockSignalObject {
     constructor(props = {}) {
         super(props);
@@ -539,6 +551,7 @@ export class MockButton extends MockSignalObject {
     constructor(props = {}) {
         super(props);
         this.accessible_label = '';
+        this.icon_name = props.icon_name ?? '';
     }
 
     update_property(properties, values) {
@@ -713,6 +726,7 @@ export function createMocks(settingsDefaults) {
             },
         },
         Adw: {
+            AboutDialog: MockAboutDialog,
             Dialog: MockDialog,
             ExpanderRow: MockExpanderRow,
             HeaderBar: MockHeaderBar,
@@ -732,6 +746,7 @@ export function createMocks(settingsDefaults) {
             Button: MockButton,
             EventControllerKey: MockEventControllerKey,
             Image: MockImage,
+            License: {GPL_2_0: 'GPL_2_0'},
             SearchEntry: MockSearchEntry,
             ScrolledWindow: MockScrolledWindow,
             AccessibleProperty: {LABEL: 'label'},
@@ -756,8 +771,10 @@ export function createMocks(settingsDefaults) {
         PrefsWindow: MockPrefsWindow,
         metadata: {
             name: 'Clipboard Decay',
+            description: 'Clears the clipboard after a configurable timeout. Optionally detects copies from selected sensitive apps (e.g. password managers) and applies a shorter timer. This extension reads and writes the system clipboard.',
             uuid: 'clipboard-decay@finegrainlabs',
             url: 'https://github.com/finegrainlabs/clipboard-decay',
         },
+        presentedAboutDialogs: [],
     };
 }
