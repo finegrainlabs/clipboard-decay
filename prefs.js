@@ -25,7 +25,7 @@ export default class ClipboardDecayPreferences extends ExtensionPreferences {
         const metadata = this.metadata ?? {};
         const _ = this.gettext.bind(this);
 
-        window.set_default_size?.(760, 820);
+        window.set_default_size?.(520, 580);
 
         const appCatalog = this._buildAppCatalog();
 
@@ -37,8 +37,7 @@ export default class ClipboardDecayPreferences extends ExtensionPreferences {
 
         const {generalRow} = this._buildGeneralGroup(page, settings, _);
         const sensitiveUi = this._buildSensitiveGroup(page, window, settings, appCatalog, _);
-        this._buildResetGroup(page, settings, sensitiveUi.searchRow, sensitiveUi.addRow, sensitiveUi.feedbackRow, _);
-        this._buildAboutGroup(page, metadata, _);
+        this._buildResetGroup(page, window, settings, metadata, sensitiveUi.searchRow, sensitiveUi.addRow, sensitiveUi.feedbackRow, _);
 
         const syncAll = () => {
             if (this._backfillResolvedAliases(settings, appCatalog))
@@ -423,7 +422,7 @@ export default class ClipboardDecayPreferences extends ExtensionPreferences {
         };
     }
 
-    _buildResetGroup(page, settings, searchRow, addRow, feedbackRow, _) {
+    _buildResetGroup(page, window, settings, metadata, searchRow, addRow, feedbackRow, _) {
         const group = new Adw.PreferencesGroup();
         page.add(group);
 
@@ -453,36 +452,36 @@ export default class ClipboardDecayPreferences extends ExtensionPreferences {
             addRow.set_text('');
             this._setFeedback(feedbackRow, '');
         });
-    }
-
-    _buildAboutGroup(page, metadata, _) {
-        const group = new Adw.PreferencesGroup({
-            title: _('About'),
+        const aboutRow = new Adw.ActionRow({
+            title: _('About Clipboard Decay'),
+            subtitle: _('Version, website, and release information'),
+            activatable: true,
         });
-        page.add(group);
+        this._addImagePrefix(aboutRow, null, 'dialog-information-symbolic');
 
-        const versionRow = new Adw.ActionRow({
-            title: _('Version'),
-            subtitle: this._getDisplayedVersionName(metadata, _),
+        const aboutChevron = new Gtk.Image({
+            icon_name: 'go-next-symbolic',
+            valign: Gtk.Align.CENTER,
         });
-        this._addImagePrefix(versionRow, null, 'dialog-information-symbolic');
-        group.add(versionRow);
+        aboutRow.add_suffix(aboutChevron);
 
-        const extensionIdRow = new Adw.ActionRow({
-            title: _('Extension ID'),
-            subtitle: metadata.uuid ?? this.uuid ?? '',
-        });
-        this._addImagePrefix(extensionIdRow, null, 'fingerprint-symbolic');
-        group.add(extensionIdRow);
-
-        if (metadata.url) {
-            const urlRow = new Adw.ActionRow({
-                title: _('Project URL'),
-                subtitle: metadata.url,
+        const showAbout = () => {
+            const about = new Adw.AboutDialog({
+                application_name: metadata.name ?? _('Clipboard Decay'),
+                application_icon: 'edit-paste-symbolic',
+                version: this._getDisplayedVersionName(metadata, _),
+                developer_name: 'Finegrain Labs',
+                website: metadata.url ?? '',
+                issue_url: metadata.url ? `${metadata.url}/issues` : '',
+                comments: metadata.description ?? '',
+                copyright: '© 2026 Finegrain Labs',
+                license_type: Gtk.License?.GPL_2_0 ?? null,
             });
-            this._addImagePrefix(urlRow, null, 'applications-internet-symbolic');
-            group.add(urlRow);
-        }
+            about.present(window);
+        };
+
+        aboutRow.connect('activated', showAbout);
+        group.add(aboutRow);
     }
 
     _getDisplayedVersionName(metadata, _) {

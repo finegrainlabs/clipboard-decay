@@ -1155,7 +1155,7 @@ describe('ClipboardDecay', () => {
             const prefs = new ClipboardDecayPreferences();
             const window = new mocks.PrefsWindow();
             prefs.fillPreferencesWindow(window);
-            return {prefs, window, page: window.children[0]};
+            return {prefs, window, page: window.children[0], mocks};
         }
 
         function getGeneralGroup(page) {
@@ -1168,10 +1168,6 @@ describe('ClipboardDecay', () => {
 
         function getResetGroup(page) {
             return page.children[2];
-        }
-
-        function getAboutGroup(page) {
-            return page.children[3];
         }
 
         function getDetectionRow(page) {
@@ -1276,16 +1272,12 @@ describe('ClipboardDecay', () => {
             return getResetRow(page).suffixes[0];
         }
 
-        function getAboutVersionRow(page) {
-            return getAboutGroup(page).children.find(child => child.title === 'Version');
+        function getAboutRow(page) {
+            return getResetGroup(page).children.find(child => child.title === 'About Clipboard Decay');
         }
 
-        function getAboutIdRow(page) {
-            return getAboutGroup(page).children.find(child => child.title === 'Extension ID');
-        }
-
-        function getAboutUrlRow(page) {
-            return getAboutGroup(page).children.find(child => child.title === 'Project URL');
+        function getAboutChevron(page) {
+            return getAboutRow(page).suffixes[0];
         }
 
         function getFeedbackRow(group) {
@@ -1299,12 +1291,11 @@ describe('ClipboardDecay', () => {
 
         it('builds the app-centric preference groups', () => {
             const {window, page} = buildPrefs();
-            assert.equal(window.default_width, 760);
-            assert.equal(window.default_height, 820);
-            assert.equal(page.children.length, 4);
+            assert.equal(window.default_width, 520);
+            assert.equal(window.default_height, 580);
+            assert.equal(page.children.length, 3);
             assert.equal(page.children[0].title, 'General Timer');
             assert.equal(page.children[1].title, 'Sensitive Apps');
-            assert.equal(page.children[3].title, 'About');
             assert.equal(getInstalledBrowseRow(getSourcesGroup(page)).title, 'Add Apps');
             assert.equal(getInstalledDialog(getSourcesGroup(page)).title, 'Add Apps');
             assert.equal(getFallbackNavRow(getSourcesGroup(page)).title, 'Can\'t find your app?');
@@ -1316,17 +1307,32 @@ describe('ClipboardDecay', () => {
             assert.equal(getDetectRow(getSourcesGroup(page)).title, 'Find the app you\'re using');
             assert.equal(getAdvancedHintRow(getSourcesGroup(page)).title, 'For terminal-based workflows, use the terminal app itself rather than the command running inside it.');
             assert.equal(getResetRow(page).title, 'Restore Defaults');
-            assert.equal(getAboutVersionRow(page).subtitle, 'Development build');
-            assert.equal(getAboutIdRow(page).subtitle, 'clipboard-decay@finegrainlabs');
-            assert.equal(getAboutUrlRow(page).subtitle, 'https://github.com/finegrainlabs/clipboard-decay');
+            assert.equal(getAboutRow(page).subtitle, 'Version, website, and release information');
+            assert.equal(getAboutChevron(page).icon_name, 'go-next-symbolic');
         });
 
-        it('shows metadata version-name in the about group when available', () => {
-            const {page} = buildPrefs(undefined, currentMocks => {
+        it('opens the about dialog from the about row', () => {
+            const {page, mocks} = buildPrefs();
+
+            getAboutRow(page).activate();
+
+            assert.equal(mocks.presentedAboutDialogs.length, 1);
+            assert.equal(mocks.presentedAboutDialogs[0].application_name, 'Clipboard Decay');
+            assert.equal(mocks.presentedAboutDialogs[0].version, 'Development build');
+            assert.equal(mocks.presentedAboutDialogs[0].website, 'https://github.com/finegrainlabs/clipboard-decay');
+            assert.equal(mocks.presentedAboutDialogs[0].issue_url, 'https://github.com/finegrainlabs/clipboard-decay/issues');
+            assert.equal(mocks.presentedAboutDialogs[0].comments, mocks.metadata.description);
+            assert.equal(mocks.presentedAboutDialogs[0].copyright, '© 2026 Finegrain Labs');
+            assert.equal(mocks.presentedAboutDialogs[0].license_type, 'GPL_2_0');
+        });
+
+        it('shows metadata version-name in the about dialog when available', () => {
+            const {page, mocks} = buildPrefs(undefined, currentMocks => {
                 currentMocks.metadata['version-name'] = '1.2.3';
             });
 
-            assert.equal(getAboutVersionRow(page).subtitle, '1.2.3');
+            getAboutRow(page).activate();
+            assert.equal(mocks.presentedAboutDialogs[0].version, '1.2.3');
         });
 
         it('binds timeout rows to settings', () => {
@@ -1996,7 +2002,7 @@ describe('ClipboardDecay', () => {
             assert.equal(resetButton.tooltip_text, 'Restore the default Clipboard Decay settings');
             assert.equal(resetButton.accessible_label, 'Restore the default Clipboard Decay settings');
             assert.equal(row.activatable, true);
-            assert.equal(resetGroup.children.length, 1);
+            assert.equal(resetGroup.children.length, 2);
         });
 
         it('adds prefix icons to info, helper, feedback, and app rows', () => {
