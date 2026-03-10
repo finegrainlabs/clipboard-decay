@@ -1,4 +1,6 @@
 schemas/gschemas.compiled
+node_modules/
 .coverage/
 .build/
 clipboard-decay@*.zip
+AGENTS.md

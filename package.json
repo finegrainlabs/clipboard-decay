@@ -1,0 +1,12 @@
+{
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "test": "node --experimental-vm-modules --import ./tests/register.mjs node_modules/.bin/mocha 'tests/**/*.test.mjs'",
+        "coverage": "c8 --all --include='*.js' --exclude='tests/**' --reporter=text --reporter=html --reports-dir=.coverage npm test"
+    },
+    "devDependencies": {
+        "c8": "^10.0.0",
+        "mocha": "^11.0.0"
+    }
+}

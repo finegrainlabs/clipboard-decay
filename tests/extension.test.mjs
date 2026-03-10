@@ -165,6 +165,10 @@ describe('ClipboardDecay', () => {
             mocks.settings.seedUserValue(SENSITIVE_SOURCES_KEY, [' KeePassXC ', 'keepassxc.desktop']);
             assert.deepEqual(getSensitiveSources(mocks.settings), ['keepassxc']);
         });
+
+        it('falls back to empty array when get_strv is unavailable', () => {
+            assert.deepEqual(getSensitiveSources({}), []);
+        });
     });
 
     // ── _loadDecaySettings ──
@@ -346,6 +350,20 @@ describe('ClipboardDecay', () => {
 
             assert.equal(ext._focusCaptureSignalId, null);
             assert.equal(ext._focusCaptureTimeoutId, null);
+            ext.disable();
+        });
+
+        it('returns early from _syncFocusCaptureMode when global.display is null', () => {
+            const ext = makeExt();
+            const saved = globalThis.display;
+            try {
+                globalThis.display = null;
+                mocks.settings.set_boolean(DETECT_WINDOW_MODE_KEY, true);
+                ext._syncFocusCaptureMode();
+                assert.equal(ext._focusCaptureSignalId, null);
+            } finally {
+                globalThis.display = saved;
+            }
             ext.disable();
         });
 
@@ -1393,6 +1411,25 @@ describe('ClipboardDecay', () => {
             assert.equal(result, mocks.Gdk.EVENT_STOP);
         });
 
+        it('pops the navigation view when Escape is pressed on the fallback page', () => {
+            const {page} = buildPrefs();
+            const group = getSourcesGroup(page);
+            const navigationView = getNavigationView(group);
+            const dialog = getInstalledDialog(group);
+            const searchRow = getInstalledSearchRow(group);
+            const controller = searchRow.controllers[0];
+            const fallbackPage = getFallbackPage(group);
+
+            getFallbackNavRow(group).activate();
+            assert.equal(navigationView.visiblePage, fallbackPage);
+
+            const result = controller.emitKeyPressed(mocks.Gdk.KEY_Escape);
+
+            assert.notEqual(navigationView.visiblePage, fallbackPage);
+            assert.equal(dialog.close_calls, 0);
+            assert.equal(result, mocks.Gdk.EVENT_STOP);
+        });
+
         it('does not close the installed-app picker dialog on other keys', () => {
             const {page} = buildPrefs();
             const installedGroup = getSourcesGroup(page);
@@ -1638,6 +1675,19 @@ describe('ClipboardDecay', () => {
             assert.deepEqual(mocks.settings.get_strv(SENSITIVE_SOURCES_KEY), ['bitwarden', 'com.bitwarden']);
         });
 
+        it('applies empty string when _detectedIdentifier is undefined', () => {
+            const {page} = buildPrefs();
+            const group = getSourcesGroup(page);
+            const detectedRow = getDetectedRow(group);
+            const feedbackRow = getFeedbackRow(group);
+
+            getFallbackNavRow(group).activate();
+            detectedRow._detectedIdentifier = undefined;
+            getUseDetectedButton(group).click();
+
+            assert.notEqual(feedbackRow.title, '');
+        });
+
         it('rejects unknown manual identifiers that do not match installed apps', () => {
             const {page} = buildPrefs();
             const group = getSourcesGroup(page);
@@ -1830,6 +1880,27 @@ describe('ClipboardDecay', () => {
             mocks.settings.set_boolean(ENABLE_SENSITIVE_SOURCES_KEY, false);
 
             assert.equal(infoRow.visible, true);
+        });
+
+        it('handles _applyDetectedWindowId when get_string is unavailable', () => {
+            const {prefs, page} = buildPrefs();
+            const group = getSourcesGroup(page);
+            const detectedRow = getDetectedRow(group);
+
+            prefs._applyDetectedWindowId(
+                {},
+                {
+                    navigationView: getNavigationView(group),
+                    fallbackPage: getFallbackPage(group),
+                    detectedRow,
+                    useDetectedButton: getUseDetectedButton(group),
+                    addRow: getAdvancedAddRow(group),
+                    feedbackRow: getFeedbackRow(group),
+                },
+                text => text
+            );
+
+            assert.equal(detectedRow.visible, false);
         });
 
         it('disconnects prefs signals when window is destroyed', () => {
@@ -2378,6 +2449,27 @@ describe('ClipboardDecay', () => {
             );
         });
 
+        it('filters with rawQuery only when normalizedQuery is empty', () => {
+            const prefs = new ClipboardDecayPreferences();
+            const catalog = prefs._buildAppCatalog();
+
+            const results = prefs._matchInstalledApps(catalog, '.desktop');
+
+            assert.equal(results.length, 0);
+        });
+
+        it('returns all apps when query is null', () => {
+            const prefs = new ClipboardDecayPreferences();
+            const catalog = prefs._buildAppCatalog();
+
+            const results = prefs._matchInstalledApps(catalog, null);
+
+            assert.deepEqual(
+                results.map(app => app.name),
+                catalog.apps.map(app => app.name)
+            );
+        });
+
         it('shows a helper message when no installed apps match the filter', () => {
             const {prefs, page} = buildPrefs();
             const installedGroup = getSourcesGroup(page);
@@ -2564,6 +2656,40 @@ describe('ClipboardDecay', () => {
 
             assert.equal(getEmptyRow(selectedGroup).visible, true);
             assert.equal(getInfoRow(selectedGroup).visible, false);
+        });
+
+        it('handles null listGroup in _syncSensitiveMode without crashing', () => {
+            const {prefs, page} = buildPrefs({'sensitive-sources': []});
+            const selectedGroup = getSourcesGroup(page);
+            const advancedGroup = getSourcesGroup(page);
+
+            prefs._syncSensitiveMode(
+                mocks.settings,
+                getGeneralTimeoutRow(page),
+                {
+                    sensitiveRow: getSensitiveTimeoutRow(page),
+                    group: selectedGroup,
+                    emptyRow: getEmptyRow(selectedGroup),
+                    infoRow: getInfoRow(selectedGroup),
+                    browseRow: getInstalledBrowseRow(selectedGroup),
+                    browseButton: getInstalledBrowseButton(selectedGroup),
+                    fallbackNavRow: getFallbackNavRow(advancedGroup),
+                    searchRow: getInstalledSearchRow(selectedGroup),
+                    helperRow: getInstalledHelperRow(selectedGroup),
+                    listGroup: null,
+                    navigationView: getNavigationView(advancedGroup),
+                    fallbackPage: getFallbackPage(advancedGroup),
+                    detectRow: getDetectRow(advancedGroup),
+                    detectButton: getDetectButton(advancedGroup),
+                    detectedRow: getDetectedRow(advancedGroup),
+                    useDetectedButton: getUseDetectedButton(advancedGroup),
+                    addRow: getAdvancedAddRow(advancedGroup),
+                    hintRow: getAdvancedHintRow(advancedGroup),
+                    feedbackRow: getFeedbackRow(advancedGroup),
+                }
+            );
+
+            assert.equal(getEmptyRow(selectedGroup).visible, true);
         });
 
         it('signal objects disconnect handlers cleanly', () => {
