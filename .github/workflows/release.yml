@@ -39,26 +39,14 @@ jobs:
       - name: Build extension zip
         run: ./scripts/package.sh
 
-      - name: Resolve release metadata
+      - name: Resolve asset path
         id: release_meta
         run: |
-          python3 - <<'PY' >> "$GITHUB_OUTPUT"
-          import json
-          from pathlib import Path
-
-          metadata = json.loads(Path('metadata.json').read_text())
-          tag = Path('${{ github.ref_name }}').name
-
-          print(f"tag_name={tag}")
-          print(f"release_name={tag}")
-          print(f"asset_path={metadata['uuid']}.zip")
-          print(f"asset_name={metadata['uuid']}.zip")
-          PY
+          uuid=$(python3 -c 'import json; print(json.load(open("metadata.json"))["uuid"])')
+          echo "asset_path=${uuid}.zip" >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.release_meta.outputs.tag_name }}
-          name: ${{ steps.release_meta.outputs.release_name }}
           generate_release_notes: true
           files: ${{ steps.release_meta.outputs.asset_path }}
