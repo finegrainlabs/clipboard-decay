@@ -1,5 +1,6 @@
 {
     "private": true,
+    "license": "GPL-2.0-or-later",
     "type": "module",
     "scripts": {
         "test": "node --experimental-vm-modules --import ./tests/register.mjs node_modules/.bin/mocha 'tests/**/*.test.mjs'",

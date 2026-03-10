@@ -55,6 +55,8 @@ On Wayland, code changes usually require disabling/re-enabling the extension or 
 
 ## Development
 
+Contribution guidelines live in `CONTRIBUTING.md`.
+
 Run tests:
 
 ```bash
@@ -92,3 +94,10 @@ To build a release zip for local installation or GNOME Extensions packaging:
 ```
 
 Packaged builds automatically stamp `metadata.json` with a user-visible `version-name` derived from the exact git tag on `HEAD` (for example `v1.0.0` becomes `1.0.0`). If `HEAD` is not tagged, the package falls back to a development label based on the short commit hash.
+
+## License
+
+This project is licensed under `GPL-2.0-or-later`.
+
+- `LICENSE` contains the canonical GPL v2 license text used for distribution and GitHub detection
+- `NOTICE` explains the project-specific `GPL-2.0-or-later` licensing statement used by the source file SPDX headers
