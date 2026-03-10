@@ -11,6 +11,9 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    concurrency:
+      group: release-${{ github.ref }}
+      cancel-in-progress: false
 
     steps:
       - name: Check out repository
@@ -39,14 +42,50 @@ jobs:
       - name: Build extension zip
         run: ./scripts/package.sh
 
-      - name: Resolve asset path
+      - name: Prepare release assets
         id: release_meta
+        env:
+          TAG_NAME: ${{ github.ref_name }}
         run: |
+          set -euo pipefail
+
+          tag="$TAG_NAME"
           uuid=$(python3 -c 'import json; print(json.load(open("metadata.json"))["uuid"])')
-          echo "asset_path=${uuid}.zip" >> "$GITHUB_OUTPUT"
+          source_zip="${uuid}.zip"
+          release_zip="${uuid}-${tag}.zip"
+          checksum_file="${release_zip}.sha256"
+
+          mv "$source_zip" "$release_zip"
+          sha256sum "$release_zip" > "$checksum_file"
+
+          {
+            echo "tag=${tag}"
+            echo "release_zip=${release_zip}"
+            echo "checksum_file=${checksum_file}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Build release notes footer
+        id: release_notes
+        env:
+          RELEASE_ZIP: ${{ steps.release_meta.outputs.release_zip }}
+          CHECKSUM_FILE: ${{ steps.release_meta.outputs.checksum_file }}
+        run: |
+          set -euo pipefail
+
+          cat <<EOF >> "$GITHUB_OUTPUT"
+          body<<__BODY__
+          ## Assets
+          - `${RELEASE_ZIP}` - packaged GNOME Shell extension zip
+          - `${CHECKSUM_FILE}` - SHA-256 checksum for the zip
+          __BODY__
+          EOF
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
+          name: ${{ steps.release_meta.outputs.tag }}
           generate_release_notes: true
-          files: ${{ steps.release_meta.outputs.asset_path }}
+          body: ${{ steps.release_notes.outputs.body }}
+          files: |
+            ${{ steps.release_meta.outputs.release_zip }}
+            ${{ steps.release_meta.outputs.checksum_file }}
