@@ -90,3 +90,5 @@ To build a release zip for local installation or GNOME Extensions packaging:
 ```bash
 ./scripts/package.sh
 ```
+
+Packaged builds automatically stamp `metadata.json` with a user-visible `version-name` derived from the exact git tag on `HEAD` (for example `v1.0.0` becomes `1.0.0`). If `HEAD` is not tagged, the package falls back to a development label based on the short commit hash.

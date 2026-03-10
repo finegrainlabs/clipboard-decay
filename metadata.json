@@ -1,8 +1,7 @@
 {
     "name": "Clipboard Decay",
-    "description": "Can clear the clipboard after a timeout, with an optional shorter timer for copies detected as coming from selected sensitive apps.",
+    "description": "Clears the clipboard after a configurable timeout. Optionally detects copies from selected sensitive apps (e.g. password managers) and applies a shorter timer. This extension reads and writes the system clipboard.",
     "uuid": "clipboard-decay@finegrainlabs",
-    "version": 1,
     "shell-version": ["49"],
     "url": "https://github.com/finegrainlabs/clipboard-decay",
     "settings-schema": "org.gnome.shell.extensions.clipboard-decay"

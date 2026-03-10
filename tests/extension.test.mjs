@@ -1170,6 +1170,10 @@ describe('ClipboardDecay', () => {
             return page.children[2];
         }
 
+        function getAboutGroup(page) {
+            return page.children[3];
+        }
+
         function getDetectionRow(page) {
             return getSourcesGroup(page).children[0];
         }
@@ -1272,6 +1276,18 @@ describe('ClipboardDecay', () => {
             return getResetRow(page).suffixes[0];
         }
 
+        function getAboutVersionRow(page) {
+            return getAboutGroup(page).children.find(child => child.title === 'Version');
+        }
+
+        function getAboutIdRow(page) {
+            return getAboutGroup(page).children.find(child => child.title === 'Extension ID');
+        }
+
+        function getAboutUrlRow(page) {
+            return getAboutGroup(page).children.find(child => child.title === 'Project URL');
+        }
+
         function getFeedbackRow(group) {
             return getFallbackPage(group).child.content.children[4];
         }
@@ -1285,9 +1301,10 @@ describe('ClipboardDecay', () => {
             const {window, page} = buildPrefs();
             assert.equal(window.default_width, 760);
             assert.equal(window.default_height, 820);
-            assert.equal(page.children.length, 3);
+            assert.equal(page.children.length, 4);
             assert.equal(page.children[0].title, 'General Timer');
             assert.equal(page.children[1].title, 'Sensitive Apps');
+            assert.equal(page.children[3].title, 'About');
             assert.equal(getInstalledBrowseRow(getSourcesGroup(page)).title, 'Add Apps');
             assert.equal(getInstalledDialog(getSourcesGroup(page)).title, 'Add Apps');
             assert.equal(getFallbackNavRow(getSourcesGroup(page)).title, 'Can\'t find your app?');
@@ -1299,6 +1316,17 @@ describe('ClipboardDecay', () => {
             assert.equal(getDetectRow(getSourcesGroup(page)).title, 'Find the app you\'re using');
             assert.equal(getAdvancedHintRow(getSourcesGroup(page)).title, 'For terminal-based workflows, use the terminal app itself rather than the command running inside it.');
             assert.equal(getResetRow(page).title, 'Restore Defaults');
+            assert.equal(getAboutVersionRow(page).subtitle, 'Development build');
+            assert.equal(getAboutIdRow(page).subtitle, 'clipboard-decay@finegrainlabs');
+            assert.equal(getAboutUrlRow(page).subtitle, 'https://github.com/finegrainlabs/clipboard-decay');
+        });
+
+        it('shows metadata version-name in the about group when available', () => {
+            const {page} = buildPrefs(undefined, currentMocks => {
+                currentMocks.metadata['version-name'] = '1.2.3';
+            });
+
+            assert.equal(getAboutVersionRow(page).subtitle, '1.2.3');
         });
 
         it('binds timeout rows to settings', () => {

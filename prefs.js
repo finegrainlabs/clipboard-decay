@@ -22,6 +22,7 @@ import {
 export default class ClipboardDecayPreferences extends ExtensionPreferences {
     fillPreferencesWindow(window) {
         const settings = this.getSettings();
+        const metadata = this.metadata ?? {};
         const _ = this.gettext.bind(this);
 
         window.set_default_size?.(760, 820);
@@ -37,6 +38,7 @@ export default class ClipboardDecayPreferences extends ExtensionPreferences {
         const {generalRow} = this._buildGeneralGroup(page, settings, _);
         const sensitiveUi = this._buildSensitiveGroup(page, window, settings, appCatalog, _);
         this._buildResetGroup(page, settings, sensitiveUi.searchRow, sensitiveUi.addRow, sensitiveUi.feedbackRow, _);
+        this._buildAboutGroup(page, metadata, _);
 
         const syncAll = () => {
             if (this._backfillResolvedAliases(settings, appCatalog))
@@ -451,6 +453,40 @@ export default class ClipboardDecayPreferences extends ExtensionPreferences {
             addRow.set_text('');
             this._setFeedback(feedbackRow, '');
         });
+    }
+
+    _buildAboutGroup(page, metadata, _) {
+        const group = new Adw.PreferencesGroup({
+            title: _('About'),
+        });
+        page.add(group);
+
+        const versionRow = new Adw.ActionRow({
+            title: _('Version'),
+            subtitle: this._getDisplayedVersionName(metadata, _),
+        });
+        this._addImagePrefix(versionRow, null, 'dialog-information-symbolic');
+        group.add(versionRow);
+
+        const extensionIdRow = new Adw.ActionRow({
+            title: _('Extension ID'),
+            subtitle: metadata.uuid ?? this.uuid ?? '',
+        });
+        this._addImagePrefix(extensionIdRow, null, 'fingerprint-symbolic');
+        group.add(extensionIdRow);
+
+        if (metadata.url) {
+            const urlRow = new Adw.ActionRow({
+                title: _('Project URL'),
+                subtitle: metadata.url,
+            });
+            this._addImagePrefix(urlRow, null, 'applications-internet-symbolic');
+            group.add(urlRow);
+        }
+    }
+
+    _getDisplayedVersionName(metadata, _) {
+        return metadata['version-name'] ?? _('Development build');
     }
 
     _buildAppCatalog() {

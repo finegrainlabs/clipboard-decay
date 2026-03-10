@@ -3,7 +3,8 @@
     "type": "module",
     "scripts": {
         "test": "node --experimental-vm-modules --import ./tests/register.mjs node_modules/.bin/mocha 'tests/**/*.test.mjs'",
-        "coverage": "c8 --all --include='*.js' --exclude='tests/**' --reporter=text --reporter=html --reports-dir=.coverage npm test"
+        "coverage": "c8 --all --include='*.js' --exclude='tests/**' --reporter=text --reporter=html --reports-dir=.coverage npm test",
+        "check:release": "node ./scripts/validate-release.mjs"
     },
     "devDependencies": {
         "c8": "^10.0.0",

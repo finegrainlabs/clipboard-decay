@@ -613,17 +613,25 @@ export class MockExtensionBase {
     }
 
     get metadata() {
-        return {name: 'Clipboard Decay'};
+        return globalThis.__mocks.metadata;
     }
 
     get uuid() {
-        return 'clipboard-decay@finegrainlabs';
+        return globalThis.__mocks.metadata.uuid;
     }
 }
 
 export class MockExtensionPreferencesBase {
     getSettings() {
         return globalThis.__mocks.settings;
+    }
+
+    get metadata() {
+        return globalThis.__mocks.metadata;
+    }
+
+    get uuid() {
+        return globalThis.__mocks.metadata.uuid;
     }
 
     gettext(text) {
@@ -746,6 +754,10 @@ export function createMocks(settingsDefaults) {
         ExtensionBase: MockExtensionBase,
         ExtensionPreferencesBase: MockExtensionPreferencesBase,
         PrefsWindow: MockPrefsWindow,
-        metadata: {name: 'Clipboard Decay'},
+        metadata: {
+            name: 'Clipboard Decay',
+            uuid: 'clipboard-decay@finegrainlabs',
+            url: 'https://github.com/finegrainlabs/clipboard-decay',
+        },
     };
 }

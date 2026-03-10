@@ -9,7 +9,7 @@ ZIP_PATH="$ROOT_DIR/${UUID}.zip"
 rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR/$UUID/schemas"
 
-cp "$ROOT_DIR/metadata.json" "$BUILD_DIR/$UUID/"
+node "$ROOT_DIR/scripts/render-metadata.mjs" "$ROOT_DIR/metadata.json" "$BUILD_DIR/$UUID/metadata.json"
 cp "$ROOT_DIR/extension.js" "$BUILD_DIR/$UUID/"
 cp "$ROOT_DIR/prefs.js" "$BUILD_DIR/$UUID/"
 cp "$ROOT_DIR/utils.js" "$BUILD_DIR/$UUID/"
