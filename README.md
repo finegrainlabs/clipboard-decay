@@ -95,6 +95,8 @@ To build a release zip for local installation or GNOME Extensions packaging:
 
 Packaged builds automatically stamp `metadata.json` with a user-visible `version-name` derived from the exact git tag on `HEAD` (for example `v1.0.0` becomes `1.0.0`). If `HEAD` is not tagged, the package falls back to a development label based on the short commit hash.
 
+To publish a GitHub Release automatically, create and push a tag like `v0.1.0`. The release workflow will run the tests, build `clipboard-decay@finegrainlabs.zip`, and attach it to the generated GitHub Release.
+
 ## License
 
 This project is licensed under `GPL-2.0-or-later`.
