@@ -14,6 +14,7 @@ cp "$ROOT_DIR/extension.js" "$BUILD_DIR/$UUID/"
 cp "$ROOT_DIR/prefs.js" "$BUILD_DIR/$UUID/"
 cp "$ROOT_DIR/utils.js" "$BUILD_DIR/$UUID/"
 cp "$ROOT_DIR/LICENSE" "$BUILD_DIR/$UUID/"
+cp "$ROOT_DIR/NOTICE" "$BUILD_DIR/$UUID/"
 cp "$ROOT_DIR/README.md" "$BUILD_DIR/$UUID/"
 cp "$ROOT_DIR/schemas/org.gnome.shell.extensions.clipboard-decay.gschema.xml" "$BUILD_DIR/$UUID/schemas/"
 

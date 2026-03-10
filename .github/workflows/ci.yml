@@ -82,6 +82,7 @@ jobs:
 
           required = {
               'LICENSE',
+              'NOTICE',
               'README.md',
               'extension.js',
               'metadata.json',
